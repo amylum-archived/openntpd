@@ -15,7 +15,7 @@ SOURCE_URL = http://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/$(PACKAGE)-$(PACKAGE_VE
 SOURCE_PATH = /tmp/source
 SOURCE_TARBALL = /tmp/source.tar.gz
 
-PATH_FLAGS = --bindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc
+PATH_FLAGS = --sbindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc
 CONF_FLAGS = --with-privsep-user=ntp --with-privsep-path=/run/openntpd/
 CFLAGS = -static -static-libgcc -Wl,-static -lc -I$(DEP_DIR)/include
 
@@ -42,7 +42,7 @@ build: source
 	cp -R /usr/include/{linux,asm,asm-generic} $(DEP_DIR)/include/
 	cd $(BUILD_DIR) && CC=musl-gcc CFLAGS='$(CFLAGS)' ./configure $(PATH_FLAGS) $(CONF_FLAGS)
 	cd $(BUILD_DIR) && make DESTDIR=$(RELEASE_DIR) install
-	rm -rf $(RELEASE_DIR)/var
+	rm -rf $(RELEASE_DIR)/local
 	mkdir -p $(RELEASE_DIR)/usr/share/licenses/$(PACKAGE)
 	cp $(BUILD_DIR)/COPYING $(RELEASE_DIR)/usr/share/licenses/$(PACKAGE)/LICENSE
 	cd $(RELEASE_DIR) && tar -czvf $(RELEASE_FILE) *
