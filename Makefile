@@ -7,27 +7,17 @@ BUILD_DIR = /tmp/$(PACKAGE)-build
 RELEASE_DIR = /tmp/$(PACKAGE)-release
 RELEASE_FILE = /tmp/$(PACKAGE).tar.gz
 
-PACKAGE_VERSION = 5.7p4
+PACKAGE_VERSION = $$(git --git-dir=upstream/.git describe --tags)
 PATCH_VERSION = $$(cat version)
 VERSION = $(PACKAGE_VERSION)-$(PATCH_VERSION)
-
-SOURCE_URL = http://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/$(PACKAGE)-$(PACKAGE_VERSION).tar.gz
-SOURCE_PATH = /tmp/source
-SOURCE_TARBALL = /tmp/source.tar.gz
 
 PATH_FLAGS = --sbindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc --localstatedir=/var
 CONF_FLAGS = --with-privsep-user=ntp --with-privsep-path=/run/openntpd/
 CFLAGS = -static -static-libgcc -Wl,-static -lc -I$(DEP_DIR)/include
 
-.PHONY : default source manual container build version push local
+.PHONY : default manual container build version push local
 
 default: container
-
-source:
-	rm -rf $(SOURCE_PATH) $(SOURCE_TARBALL)
-	mkdir $(SOURCE_PATH)
-	curl -sLo $(SOURCE_TARBALL) $(SOURCE_URL)
-	tar -x -C $(SOURCE_PATH) -f $(SOURCE_TARBALL) --strip-components=1
 
 manual:
 	./meta/launch /bin/bash || true
@@ -35,9 +25,9 @@ manual:
 container:
 	./meta/launch
 
-build: source
+build:
 	rm -rf $(BUILD_DIR) $(DEP_DIR)
-	cp -R $(SOURCE_PATH) $(BUILD_DIR)
+	cp -R upstream $(BUILD_DIR)
 	mkdir -p $(DEP_DIR)/include
 	cp -R /usr/include/{linux,asm,asm-generic} $(DEP_DIR)/include/
 	cd $(BUILD_DIR) && CC=musl-gcc CFLAGS='$(CFLAGS)' ./configure $(PATH_FLAGS) $(CONF_FLAGS)
