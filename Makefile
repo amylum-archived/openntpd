@@ -15,11 +15,14 @@ PATH_FLAGS = --sbindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc --loca
 CONF_FLAGS = --with-privsep-user=ntp --with-privsep-path=/run/openntpd/
 CFLAGS = -static -static-libgcc -Wl,-static -lc -I$(DEP_DIR)/include
 
-.PHONY : default manual container build version push local
+.PHONY : default submodule manual container build version push local
 
-default: container
+default: submodule container
 
-manual:
+submodule:
+	git submodule update --init
+
+manual: submodule
 	./meta/launch /bin/bash || true
 
 container:
