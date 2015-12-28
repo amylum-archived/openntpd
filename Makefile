@@ -15,7 +15,7 @@ SOURCE_URL = http://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/$(PACKAGE)-$(PACKAGE_VE
 SOURCE_PATH = /tmp/source
 SOURCE_TARBALL = /tmp/source.tar.gz
 
-PATH_FLAGS = --prefix=/usr --sbindir=/bin --bindir=/bin --mandir=/share/man --libdir=/lib --includedir=/include --docdir=/share/doc/$(PACKAGE) --infodir=/tmp/trash --sysconfdir=/etc
+PATH_FLAGS = --bindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc
 CONF_FLAGS = --with-privsep-user=ntp --with-privsep-path=/run/openntpd/
 CFLAGS = -static -static-libgcc -Wl,-static -lc -I$(DEP_DIR)/include
 
