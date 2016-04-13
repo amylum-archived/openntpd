@@ -28,7 +28,7 @@ manual: submodule
 container:
 	./meta/launch
 
-build: source
+build:
 	rm -rf $(BUILD_DIR) $(DEP_DIR)
 	cp -R upstream $(BUILD_DIR)
 	mkdir -p $(DEP_DIR)/include
