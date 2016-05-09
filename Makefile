@@ -13,7 +13,7 @@ VERSION = $(PACKAGE_VERSION)-$(PATCH_VERSION)
 
 PATH_FLAGS = --sbindir=/usr/bin --mandir=/usr/share/man --sysconfdir=/etc --localstatedir=/var
 CONF_FLAGS = --with-privsep-user=ntp --with-privsep-path=/run/openntpd/
-CFLAGS = -static -static-libgcc -Wl,-static -lc -I$(DEP_DIR)/include
+CFLAGS = -I$(DEP_DIR)/include
 
 .PHONY : default submodule manual container build version push local
 
