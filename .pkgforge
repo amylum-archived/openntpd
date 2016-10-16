@@ -20,6 +20,8 @@ configure_flags(
 cflags
 harden
 
+patch 'libcrypto.patch'
+
 build do
   run './autogen.sh'
   configure
