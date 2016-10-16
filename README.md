@@ -1,6 +1,8 @@
 openntpd
 ==========
 
+[![Build Status](https://img.shields.io/circleci/project/amylum/openntpd/master.svg)](https://circleci.com/gh/amylum/openntpd)
+[![GitHub release](https://img.shields.io/github/release/amylum/openntpd.svg)](https://github.com/amylum/openntpd/releases)
 [![BSD Licensed](http://img.shields.io/badge/license-BSD-green.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
 Package repo for [openntpd](http://www.openntpd.org/)

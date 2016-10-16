@@ -1,0 +1,32 @@
+name 'openntpd'
+org 'amylum'
+
+licenses 'COPYING'
+
+deps(
+  'linux-api-headers': '4.8-rc6-2'
+)
+
+configure_flags(
+  prefix: '/usr',
+  sbindir: '/usr/bin',
+  mandir: '/usr/share/man',
+  sysconfdir: '/etc',
+  localstatedir: '/var',
+  'with-privsep-user': 'ntp',
+  'with-privsep-path': '/run/openntpd/'
+)
+
+cflags
+harden
+
+build do
+  run './autogen.sh'
+  configure
+  make
+  install
+end
+
+test do
+  # TODO: add tests
+end
