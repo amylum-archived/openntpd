@@ -20,8 +20,9 @@ configure_flags(
 cflags
 harden
 
-patch 'libcrypto.patch'
-patch 'ca8e7f797cb06e3b933ed250c9e7fc5d875d7de3.patch'
+patch '6b32cedc37296d836d93f370923b8e0d2e8eee1b.patch'
+patch '82143ad04705a2f5866c5719a58bb42afcf3588f.patch'
+patch 'optargs_fix.patch'
 
 build do
   run './autogen.sh'
