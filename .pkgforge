@@ -21,6 +21,7 @@ cflags
 harden
 
 patch 'libcrypto.patch'
+patch 'ca8e7f797cb06e3b933ed250c9e7fc5d875d7de3.patch'
 
 build do
   run './autogen.sh'

@@ -1,0 +1,589 @@
+diff --git a/VERSION b/VERSION
+index cec9009..f15d87c 100644
+--- a/VERSION
++++ b/VERSION
+@@ -1 +1 @@
+-6.1p1
++6.0p1
+diff --git a/include/sys/cdefs.h b/include/sys/cdefs.h
+deleted file mode 100644
+index 3dec43d..0000000
+--- a/include/sys/cdefs.h
++++ /dev/null
+@@ -1,16 +0,0 @@
+-/*
+- * Public domain
+- * sys/cdefs.h compatibility shim
+- */
+-
+-#include_next <sys/cdefs.h>
+-
+-#ifndef LIBCOMPAT_SYS_CDEFS_H
+-#define LIBCOMPAT_SYS_CDEFS_H
+-
+-#if !defined(HAVE_ATTRIBUTE__DEAD) && !defined(__dead)
+-#define __dead          __attribute__((__noreturn__))
+-#define __pure          __attribute__((__const__))
+-#endif
+-
+-#endif
+diff --git a/include/sys/types.h b/include/sys/types.h
+index 56aef0b..d1c871f 100644
+--- a/include/sys/types.h
++++ b/include/sys/types.h
+@@ -14,6 +14,10 @@
+ #include <_bsd_types.h>
+ #endif
+ 
++#if !defined(HAVE_ATTRIBUTE__DEAD) && !defined(__dead)
++#define __dead
++#endif
++
+ #if !defined(HAVE_ATTRIBUTE__BOUNDED__) && !defined(__bounded__)
+ # define __bounded__(x, y, z)
+ #endif
+diff --git a/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch b/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
+index 9615979..fabae3a 100644
+--- a/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
++++ b/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
+@@ -1,4 +1,4 @@
+-From 98f3ab8d437edaddf875629702d9b7edf800f253 Mon Sep 17 00:00:00 2001
++From ca2ca2f4b7f46c366fde7c4f1b7fc4522d49e142 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:10:22 -0600
+ Subject: [PATCH 01/13] Handle IPv6 DNS records on IPv4 networks more liberally
+@@ -13,7 +13,7 @@ Original Author: Stefan Praszalowicz <stefan.praszalowicz@avedya.com>
+  1 file changed, 10 insertions(+), 3 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/client.c b/src/usr.sbin/ntpd/client.c
+-index ddbb128..3d70317 100644
++index a92382b..7ce3b38 100644
+ --- a/src/usr.sbin/ntpd/client.c
+ +++ b/src/usr.sbin/ntpd/client.c
+ @@ -138,9 +138,16 @@ client_query(struct ntp_peer *p)
+@@ -37,5 +37,5 @@ index ddbb128..3d70317 100644
+  		if (connect(p->query->fd, sa, SA_LEN(sa)) == -1) {
+  			if (errno == ECONNREFUSED || errno == ENETUNREACH ||
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch b/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
+index 97f914f..aa334b3 100644
+--- a/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
++++ b/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
+@@ -1,4 +1,4 @@
+-From a1caa67ef58e032ca06012cb3c7f2e00b51be525 Mon Sep 17 00:00:00 2001
++From f9a6fc9728565773c01d0e2f9cfb6f52a5035dae Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:04:08 -0600
+ Subject: [PATCH 02/13] EAI_NODATA does not exist everywhere
+@@ -36,5 +36,5 @@ index b2f688e..c0a99b1 100644
+  		log_warnx("could not parse \"%s\": %s", s,
+  		    gai_strerror(error));
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch b/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
+index 680f60c..89ddd04 100644
+--- a/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
++++ b/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
+@@ -1,4 +1,4 @@
+-From cdd9f88306fd4b7bcf613ec909a0dfa2947f216b Mon Sep 17 00:00:00 2001
++From 56cce5db3e98b241cbd0b6fb589a0ee0472fb1d5 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:02:50 -0600
+ Subject: [PATCH 03/13] conditionally fill in sin_len/sin6_len if they exist
+@@ -49,5 +49,5 @@ index c0a99b1..87de17a 100644
+  			    res->ai_addr)->sin6_addr, sizeof(struct in6_addr));
+  		}
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0004-check-if-rdomain-support-is-available.patch b/patches/0004-check-if-rdomain-support-is-available.patch
+index 715b259..539b98d 100644
+--- a/patches/0004-check-if-rdomain-support-is-available.patch
++++ b/patches/0004-check-if-rdomain-support-is-available.patch
+@@ -1,33 +1,13 @@
+-From 64086a3dabe677a925ad414ff4a67e86c7fbb48e Mon Sep 17 00:00:00 2001
++From a59051f8fefda18ed49fb9d12022c6f799fb60c9 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:05:46 -0600
+ Subject: [PATCH 04/13] check if rdomain support is available.
+ 
+-Handle FreeBSD's calling rdomain 'FIB'.
+- - from naddy@openbsd.org
+ ---
+- src/usr.sbin/ntpd/ntpd.h   |  6 ++++++
+  src/usr.sbin/ntpd/parse.y  |  2 ++
+  src/usr.sbin/ntpd/server.c | 15 ++++++++++++++-
+- 3 files changed, 22 insertions(+), 1 deletion(-)
++ 2 files changed, 16 insertions(+), 1 deletion(-)
+ 
+-diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index be13fde..b2a5cd9 100644
+---- a/src/usr.sbin/ntpd/ntpd.h
+-+++ b/src/usr.sbin/ntpd/ntpd.h
+-@@ -40,6 +40,12 @@
+- #define DRIFTFILE	"/var/db/ntpd.drift"
+- #define	CTLSOCKET	"/var/run/ntpd.sock"
+- 
+-+#if defined(SO_SETFIB)
+-+#define	SO_RTABLE	SO_SETFIB
+-+#define	SIOCGIFRDOMAIN	SIOCGIFFIB
+-+#define	ifr_rdomainid	ifr_fib
+-+#endif
+-+
+- #define	INTERVAL_QUERY_NORMAL		30	/* sync to peers every n secs */
+- #define	INTERVAL_QUERY_PATHETIC		60
+- #define	INTERVAL_QUERY_AGGRESSIVE	5
+ diff --git a/src/usr.sbin/ntpd/parse.y b/src/usr.sbin/ntpd/parse.y
+ index 6d50795..33fe13d 100644
+ --- a/src/usr.sbin/ntpd/parse.y
+@@ -47,7 +27,7 @@ index 6d50795..33fe13d 100644
+  		}
+  		;
+ diff --git a/src/usr.sbin/ntpd/server.c b/src/usr.sbin/ntpd/server.c
+-index b67d274..cbaa115 100644
++index fb297d7..2e28b9b 100644
+ --- a/src/usr.sbin/ntpd/server.c
+ +++ b/src/usr.sbin/ntpd/server.c
+ @@ -35,11 +35,16 @@ setup_listeners(struct servent *se, struct ntpd_conf *lconf, u_int *cnt)
+@@ -112,5 +92,5 @@ index b67d274..cbaa115 100644
+  		if (bind(la->fd, (struct sockaddr *)&la->sa,
+  		    SA_LEN((struct sockaddr *)&la->sa)) == -1) {
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch b/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
+index 832d639..859c786 100644
+--- a/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
++++ b/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
+@@ -1,4 +1,4 @@
+-From 837f944a4bba5b0a3a9262137c86448018029a48 Mon Sep 17 00:00:00 2001
++From 2a04ec132f9ac193e4cb52cc3dbe76ed03e4b624 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:20:03 -0600
+ Subject: [PATCH 05/13] update ntpd.conf to indicate OS-dependent options
+@@ -49,5 +49,5 @@ index af11a7e..87f94e8 100644
+  .Xr ntpd 8
+  will use each given sensor that actually exists.
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0006-allow-overriding-default-user-and-file-locations.patch b/patches/0006-allow-overriding-default-user-and-file-locations.patch
+index 2f09f10..9b791f8 100644
+--- a/patches/0006-allow-overriding-default-user-and-file-locations.patch
++++ b/patches/0006-allow-overriding-default-user-and-file-locations.patch
+@@ -1,4 +1,4 @@
+-From 7fa2b6297c72062585ed515a5aa16c4451b7c873 Mon Sep 17 00:00:00 2001
++From 9df34babff002bddd4fadfb271b4226d45b007a2 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Thu, 1 Jan 2015 07:18:11 -0600
+ Subject: [PATCH 06/13] allow overriding default user and file locations
+@@ -10,7 +10,7 @@ default user.
+  1 file changed, 15 insertions(+), 3 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index b2a5cd9..f80e23c 100644
++index 3fddba8..9ee2e42 100644
+ --- a/src/usr.sbin/ntpd/ntpd.h
+ +++ b/src/usr.sbin/ntpd/ntpd.h
+ @@ -35,10 +35,20 @@
+@@ -35,9 +35,9 @@ index b2a5cd9..f80e23c 100644
+ +#define	DRIFTFILE	LOCALSTATEDIR "/db/ntpd.drift"
+ +#define	CTLSOCKET	LOCALSTATEDIR "/run/ntpd.sock"
+  
+- #if defined(SO_SETFIB)
+- #define	SO_RTABLE	SO_SETFIB
+-@@ -86,7 +96,9 @@
++ #define	INTERVAL_QUERY_NORMAL		30	/* sync to peers every n secs */
++ #define	INTERVAL_QUERY_PATHETIC		60
++@@ -80,7 +90,9 @@
+  #define CONSTRAINT_PORT			"443"	/* HTTPS port */
+  #define	CONSTRAINT_MAXHEADERLENGTH	8192
+  #define CONSTRAINT_PASSFD		(STDERR_FILENO + 1)
+@@ -45,8 +45,8 @@ index b2a5cd9..f80e23c 100644
+  #define CONSTRAINT_CA			"/etc/ssl/cert.pem"
+ +#endif
+  
+- #define PARENT_SOCK_FILENO		CONSTRAINT_PASSFD
+- 
++ enum client_state {
++ 	STATE_NONE,
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0007-add-p-option-to-create-a-pid-file.patch b/patches/0007-add-p-option-to-create-a-pid-file.patch
+index f388229..ac407a8 100644
+--- a/patches/0007-add-p-option-to-create-a-pid-file.patch
++++ b/patches/0007-add-p-option-to-create-a-pid-file.patch
+@@ -1,4 +1,4 @@
+-From 3abcf742a75a14d89f7cbea12acb4300f16c51fb Mon Sep 17 00:00:00 2001
++From 5c0b2ba4ef077a253a8ce0a11fb536b7f696ddbf Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Wed, 31 Dec 2014 08:26:41 -0600
+ Subject: [PATCH 07/13] add -p option to create a pid file
+@@ -8,9 +8,9 @@ This is used in both the Gentoo and Debian ports.
+ Origin: https://bugs.gentoo.org/show_bug.cgi?id=493082
+ ---
+  src/usr.sbin/ntpd/ntpd.8 |  4 ++++
+- src/usr.sbin/ntpd/ntpd.c | 33 ++++++++++++++++++++++++++++-----
++ src/usr.sbin/ntpd/ntpd.c | 35 +++++++++++++++++++++++++++++------
+  src/usr.sbin/ntpd/ntpd.h |  1 +
+- 3 files changed, 33 insertions(+), 5 deletions(-)
++ 3 files changed, 34 insertions(+), 6 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.8 b/src/usr.sbin/ntpd/ntpd.8
+ index dcfb6d2..1b885a1 100644
+@@ -35,7 +35,7 @@ index dcfb6d2..1b885a1 100644
+  Do not set the time immediately at startup.
+  This is the default.
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index aac5e23..463600a 100644
++index 43486f0..f8727f6 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+ @@ -87,6 +87,18 @@ sighdlr(int sig)
+@@ -66,18 +66,18 @@ index aac5e23..463600a 100644
+  		    __progname);
+  	exit(1);
+  }
+-@@ -135,7 +147,7 @@ main(int argc, char *argv[])
++@@ -132,7 +144,7 @@ main(int argc, char *argv[])
+  
+  	memset(&lconf, 0, sizeof(lconf));
+  
+--	while ((ch = getopt(argc, argv, "df:nP:sSv")) != -1) {
+-+	while ((ch = getopt(argc, argv, "df:nP:p:sSv")) != -1) {
++-	while ((ch = getopt(argc, argv, "df:nsSv")) != -1) {
+++	while ((ch = getopt(argc, argv, "df:np:sSv")) != -1) {
+  		switch (ch) {
+  		case 'd':
+  			lconf.debug = 2;
+-@@ -150,6 +162,9 @@ main(int argc, char *argv[])
+- 		case 'P':
+- 			pname = optarg;
++@@ -144,6 +156,9 @@ main(int argc, char *argv[])
++ 			lconf.debug = 2;
++ 			lconf.noaction = 1;
+  			break;
+ +		case 'p':
+ +			lconf.pid_file = optarg;
+@@ -85,7 +85,7 @@ index aac5e23..463600a 100644
+  		case 's':
+  			lconf.settime = 1;
+  			break;
+-@@ -217,9 +232,11 @@ main(int argc, char *argv[])
++@@ -192,9 +207,11 @@ main(int argc, char *argv[])
+  	if (!lconf.settime) {
+  		log_init(lconf.debug, LOG_DAEMON);
+  		log_verbose(lconf.verbose);
+@@ -93,12 +93,21 @@ index aac5e23..463600a 100644
+ +		if (!lconf.debug) {
+  			if (daemon(1, 0))
+  				fatal("daemon");
+-+			writepid(&lconf);
+ +		}
+++		writepid(&lconf);
+  	} else
+  		timeout = SETTIME_TIMEOUT * 1000;
+  
+-@@ -294,9 +311,11 @@ main(int argc, char *argv[])
++@@ -230,7 +247,7 @@ main(int argc, char *argv[])
++ 	 * Constraint processes are forked with certificates in memory,
++ 	 * then privdrop into chroot before speaking to the outside world.
++ 	 */
++-#if 0	
+++#if 0
++ 	if (pledge("stdio rpath inet settime proc id", NULL) == -1)
++ 		err(1, "pledge");
++ #endif
++@@ -275,9 +292,11 @@ main(int argc, char *argv[])
+  			log_verbose(lconf.verbose);
+  			log_warnx("no reply received in time, skipping initial "
+  			    "time setting");
+@@ -111,7 +120,7 @@ index aac5e23..463600a 100644
+  		}
+  
+  		if (nfds > 0 && (pfd[PFD_PIPE].revents & POLLOUT))
+-@@ -335,6 +354,8 @@ main(int argc, char *argv[])
++@@ -320,6 +339,8 @@ main(int argc, char *argv[])
+  	msgbuf_clear(&ibuf->w);
+  	free(ibuf);
+  	log_info("Terminating");
+@@ -120,7 +129,7 @@ index aac5e23..463600a 100644
+  	return (0);
+  }
+  
+-@@ -395,9 +416,11 @@ dispatch_imsg(struct ntpd_conf *lconf, int argc, char **argv)
++@@ -403,9 +424,11 @@ dispatch_imsg(struct ntpd_conf *lconf, const char *pw_dir,
+  			memcpy(&d, imsg.data, sizeof(d));
+  			ntpd_settime(d);
+  			/* daemonize now */
+@@ -134,10 +143,10 @@ index aac5e23..463600a 100644
+  			timeout = INFTIM;
+  			break;
+ diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index f80e23c..fcca519 100644
++index 9ee2e42..d39628c 100644
+ --- a/src/usr.sbin/ntpd/ntpd.h
+ +++ b/src/usr.sbin/ntpd/ntpd.h
+-@@ -249,6 +249,7 @@ struct ntpd_conf {
++@@ -237,6 +237,7 @@ struct ntpd_conf {
+  	u_int						constraint_errors;
+  	u_int8_t					*ca;
+  	size_t						ca_len;
+@@ -146,5 +155,5 @@ index f80e23c..fcca519 100644
+  
+  struct ctl_show_status {
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0008-initialize-setproctitle-where-needed.patch b/patches/0008-initialize-setproctitle-where-needed.patch
+index 01d640b..1622915 100644
+--- a/patches/0008-initialize-setproctitle-where-needed.patch
++++ b/patches/0008-initialize-setproctitle-where-needed.patch
+@@ -1,4 +1,4 @@
+-From c3e7a0b0601b35facd51003441603e0a93cda429 Mon Sep 17 00:00:00 2001
++From 71312c1ff3362948f6593577dfec6e6eded52642 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Mon, 12 Jan 2015 06:18:31 -0600
+ Subject: [PATCH 08/13] initialize setproctitle where needed
+@@ -10,7 +10,7 @@ clobbering them.
+  1 file changed, 19 insertions(+)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 463600a..70e5ae7 100644
++index f8727f6..cf3b4d9 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+ @@ -117,6 +117,13 @@ usage(void)
+@@ -27,16 +27,16 @@ index 463600a..70e5ae7 100644
+  int
+  main(int argc, char *argv[])
+  {
+-@@ -138,6 +145,8 @@ main(int argc, char *argv[])
+- 	char			**argv0 = argv;
+- 	char			*pname = NULL;
++@@ -135,6 +142,8 @@ main(int argc, char *argv[])
++ 	gid_t			pw_gid;
++ 	void			*newp;
+  
+ +	__progname = get_progname(argv[0]);
+ +
+  	if (strcmp(__progname, "ntpctl") == 0) {
+  		ctl_main(argc, argv);
+  		/* NOTREACHED */
+-@@ -147,6 +156,16 @@ main(int argc, char *argv[])
++@@ -144,6 +153,16 @@ main(int argc, char *argv[])
+  
+  	memset(&lconf, 0, sizeof(lconf));
+  
+@@ -50,9 +50,9 @@ index 463600a..70e5ae7 100644
+ +	argv = saved_argv;
+ +#endif
+ +
+- 	while ((ch = getopt(argc, argv, "df:nP:p:sSv")) != -1) {
++ 	while ((ch = getopt(argc, argv, "df:np:sSv")) != -1) {
+  		switch (ch) {
+  		case 'd':
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch b/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
+index 76c8c78..441fa43 100644
+--- a/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
++++ b/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
+@@ -1,4 +1,4 @@
+-From 11ad02bf243bed31db3a395e0b639fa4878e0192 Mon Sep 17 00:00:00 2001
++From 58940edb034bf022031732e76d0481f737614eaf Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Fri, 27 Mar 2015 23:14:15 -0500
+ Subject: [PATCH 09/13] Notify the user when constraint support is disabled.
+@@ -27,12 +27,12 @@ index 87de17a..5a75030 100644
+  }
+  
+ diff --git a/src/usr.sbin/ntpd/constraint.c b/src/usr.sbin/ntpd/constraint.c
+-index e19d68e..791a74c 100644
++index f259b08..46b96ee 100644
+ --- a/src/usr.sbin/ntpd/constraint.c
+ +++ b/src/usr.sbin/ntpd/constraint.c
+-@@ -340,12 +340,14 @@ priv_constraint_child(const char *pw_dir, uid_t pw_uid, gid_t pw_gid)
+- 	    (am = calloc(1, sizeof(*am))) == NULL)
+- 		fatal("%s: calloc", __func__);
++@@ -292,12 +292,14 @@ priv_constraint_child(struct constraint *cstr, struct ntp_addr_msg *am,
++ 	if (setpriority(PRIO_PROCESS, 0, 0) == -1)
++ 		log_warn("could not set priority");
+  
+ +#ifdef HAVE_LIBTLS
+  	/* Init TLS and load CA certs before chroot() */
+@@ -64,5 +64,5 @@ index 87f94e8..7f729d2 100644
+  .It Ic constraint from Ar url
+  Specify the URL, IP address or the hostname of an HTTPS server to
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch b/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
+index 3e2b70e..dc2d2a5 100644
+--- a/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
++++ b/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
+@@ -1,4 +1,4 @@
+-From e0adef935d739f79f2bf25ed314096ac0d7dfeb7 Mon Sep 17 00:00:00 2001
++From 250b304b0dbd81de45d7f147a82fd89d78113a3f Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Mon, 4 May 2015 04:27:29 -0500
+ Subject: [PATCH 10/13] add a method for updating the realtime clock on sync
+@@ -9,7 +9,7 @@ from Christian Weisgerber
+  1 file changed, 2 insertions(+)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 70e5ae7..1cc7bc1 100644
++index cf3b4d9..b665000 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+ @@ -55,6 +55,7 @@ const char     *ctl_lookup_option(char *, const char **);
+@@ -20,7 +20,7 @@ index 70e5ae7..1cc7bc1 100644
+  
+  volatile sig_atomic_t	 quit = 0;
+  volatile sig_atomic_t	 reconfig = 0;
+-@@ -488,6 +489,7 @@ ntpd_adjtime(double d)
++@@ -496,6 +497,7 @@ ntpd_adjtime(double d)
+  	else if (!firstadj && olddelta.tv_sec == 0 && olddelta.tv_usec == 0)
+  		synced = 1;
+  	firstadj = 0;
+@@ -29,5 +29,5 @@ index 70e5ae7..1cc7bc1 100644
+  }
+  
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch b/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
+index 27604d6..4513311 100644
+--- a/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
++++ b/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
+@@ -1,4 +1,4 @@
+-From 903c33797293f1f5607c77834362870812f7f799 Mon Sep 17 00:00:00 2001
++From d489be05f5adf4c8c4954ef95808f748bf7878d5 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+ Date: Sun, 6 Dec 2015 22:35:38 -0600
+ Subject: [PATCH 11/13] Deal with missing SO_TIMESTAMP
+@@ -11,7 +11,7 @@ Fall back to the previous client.c implementation when it is not found.
+  1 file changed, 9 insertions(+), 1 deletion(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/client.c b/src/usr.sbin/ntpd/client.c
+-index 3d70317..5619454 100644
++index 7ce3b38..edca87c 100644
+ --- a/src/usr.sbin/ntpd/client.c
+ +++ b/src/usr.sbin/ntpd/client.c
+ @@ -163,10 +163,12 @@ client_query(struct ntp_peer *p)
+@@ -65,5 +65,5 @@ index 3d70317..5619454 100644
+  	if (T4 < JAN_1970) {
+  		client_log_error(p, "recvmsg control format", EBADF);
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0012-check-result-of-ftello-ftruncate.patch b/patches/0012-check-result-of-ftello-ftruncate.patch
+index 92306a0..13b3d5a 100644
+--- a/patches/0012-check-result-of-ftello-ftruncate.patch
++++ b/patches/0012-check-result-of-ftello-ftruncate.patch
+@@ -1,4 +1,4 @@
+-From cb26bc1bcbc250f4493ce1574d095763692b8018 Mon Sep 17 00:00:00 2001
++From 2bed8fd9ab9ad6016e45f91fd2de5de2a6c79fce Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+ Date: Mon, 21 Dec 2015 05:53:20 -0600
+ Subject: [PATCH 12/13] check result of ftello/ftruncate
+@@ -8,10 +8,10 @@ Subject: [PATCH 12/13] check result of ftello/ftruncate
+  1 file changed, 5 insertions(+), 2 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 1cc7bc1..4493040 100644
++index b665000..18cc21d 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+-@@ -592,6 +592,7 @@ writefreq(double d)
++@@ -600,6 +600,7 @@ writefreq(double d)
+  {
+  	int r;
+  	static int warnonce = 1;
+@@ -19,7 +19,7 @@ index 1cc7bc1..4493040 100644
+  
+  	if (freqfp == NULL)
+  		return 0;
+-@@ -605,8 +606,10 @@ writefreq(double d)
++@@ -613,8 +614,10 @@ writefreq(double d)
+  		clearerr(freqfp);
+  		return 0;
+  	}
+@@ -33,5 +33,5 @@ index 1cc7bc1..4493040 100644
+  }
+  
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch b/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
+index dc78ae8..b07f0a0 100644
+--- a/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
++++ b/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
+@@ -1,6 +1,6 @@
+-From f54f940c62731f2b7049af2e3785b88138bc2d75 Mon Sep 17 00:00:00 2001
++From bb9cd07007cf0e04a6f1ae50dcb9de977353a512 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+-Date: Sat, 13 Aug 2016 14:22:02 -0500
++Date: Tue, 17 May 2016 08:31:24 -0500
+ Subject: [PATCH 13/13] set IPV6_V6ONLY if we are binding to an IPv6 address
+ 
+ ---
+@@ -8,7 +8,7 @@ Subject: [PATCH 13/13] set IPV6_V6ONLY if we are binding to an IPv6 address
+  1 file changed, 9 insertions(+)
+ 
+ diff --git a/src/usr.sbin/ntpd/server.c b/src/usr.sbin/ntpd/server.c
+-index cbaa115..dd554e6 100644
++index 2e28b9b..1f3a074 100644
+ --- a/src/usr.sbin/ntpd/server.c
+ +++ b/src/usr.sbin/ntpd/server.c
+ @@ -42,6 +42,9 @@ setup_listeners(struct servent *se, struct ntpd_conf *lconf, u_int *cnt)
+@@ -35,5 +35,5 @@ index cbaa115..dd554e6 100644
+  		if (la->rtable != -1 &&
+  		    setsockopt(la->fd, SOL_SOCKET, SO_RTABLE, &la->rtable,
+ -- 
+-2.10.1
++2.8.1
+ 
+diff --git a/update.sh b/update.sh
+index b6bbb3d..c0e4372 100755
+--- a/update.sh
++++ b/update.sh
+@@ -23,7 +23,7 @@ dir=`pwd`
+ patches=$dir/patches
+ libc_inc=$dir/openbsd/src/include
+ libc_src=$dir/openbsd/src/lib/libc
+-arc4random_src=$dir/openbsd/src/lib/libcrypto/arc4random
++libcrypto_src=$dir/openbsd/src/lib/libcrypto
+ libutil_src=$dir/openbsd/src/lib/libutil
+ ntpd_src=$dir/openbsd/src/usr.sbin/ntpd
+ 
+@@ -51,10 +51,10 @@ $CP_LIBC $libc_src/crypt/arc4random_uniform.c compat
+ $CP_LIBC $libc_src/crypt/chacha_private.h compat
+ $CP_LIBC $libc_src/hash/md5.c compat
+ $CP_LIBC $libc_src/hash/sha2.c compat
+-for i in $arc4random_src/getentropy_*.c; do
++for i in $libcrypto_src/crypto/getentropy_*.c; do
+ 	sed -e 's/openssl\/sha.h/sha2.h/' < $i > compat/`basename $i`
+ done
+-$CP $arc4random_src/arc4random_*.h compat
++$CP $libcrypto_src/crypto/arc4random_*.h compat
+ 
+ for i in client.c config.c constraint.c control.c log.c ntp.c ntp.h \
+ 	ntp_dns.c ntp_msg.c ntpd.c ntpd.h parse.y sensors.c server.c util.c \
