@@ -1,5 +1,5 @@
 diff --git a/patches/0007-add-p-option-to-create-a-pid-file.patch b/patches/0007-add-p-option-to-create-a-pid-file.patch
-index ac407a8..ebda883 100644
+index ac407a8..9ca08a7 100644
 --- a/patches/0007-add-p-option-to-create-a-pid-file.patch
 +++ b/patches/0007-add-p-option-to-create-a-pid-file.patch
 @@ -70,8 +70,8 @@ index 43486f0..f8727f6 100644
@@ -13,6 +13,19 @@ index ac407a8..ebda883 100644
   		switch (ch) {
   		case 'd':
   			lconf.debug = 2;
+@@ -85,10 +85,10 @@ index 43486f0..f8727f6 100644
+  		case 's':
+  			lconf.settime = 1;
+  			break;
+-@@ -192,9 +207,11 @@ main(int argc, char *argv[])
++@@ -210,9 +225,11 @@ main(int argc, char *argv[])
+  	if (!lconf.settime) {
+  		log_init(lconf.debug, LOG_DAEMON);
+- 		log_verbose(lconf.verbose);
++ 		log_setverbose(lconf.verbose);
+ -		if (!lconf.debug)
+ +		if (!lconf.debug) {
+  			if (daemon(1, 0))
 @@ -98,15 +98,6 @@ index 43486f0..f8727f6 100644
   	} else
   		timeout = SETTIME_TIMEOUT * 1000;
