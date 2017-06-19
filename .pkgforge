@@ -20,7 +20,7 @@ configure_flags(
 cflags
 harden
 
-patch '6b32cedc37296d836d93f370923b8e0d2e8eee1b.patch'
+#patch '6b32cedc37296d836d93f370923b8e0d2e8eee1b.patch'
 patch '82143ad04705a2f5866c5719a58bb42afcf3588f.patch'
 patch 'optargs_fix.patch'
 
