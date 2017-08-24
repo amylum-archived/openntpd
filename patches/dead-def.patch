@@ -1,0 +1,32 @@
+diff --git a/patches/9001-dead-define.patch b/patches/9001-dead-define.patch
+new file mode 100644
+index 0000000..5c87d54
+--- /dev/null
++++ b/patches/9001-dead-define.patch
+@@ -0,0 +1,26 @@
++--- a/src/usr.sbin/ntpd/ntpd.h	2017-08-24 01:00:57.000000000 +0000
+++++ a/src/usr.sbin/ntpd/ntpd.h	2017-08-24 01:00:30.000000000 +0000
++@@ -106,6 +106,10 @@
++ #define NTPDNS_PROC_NAME		"ntp_dns"
++ #define CONSTRAINT_PROC_NAME		"constraint"
++ 
+++#ifndef __dead 
+++#define __dead volatile 
+++#endif 
+++
++ enum client_state {
++ 	STATE_NONE,
++ 	STATE_DNS_INPROGRESS,
++--- a/src/usr.sbin/ntpd/log.c	2017-08-24 01:15:17.000000000 +0000
+++++ b/src/usr.sbin/ntpd/log.c	2017-08-24 01:19:38.000000000 +0000
++@@ -24,6 +24,10 @@
++ #include <errno.h>
++ #include <time.h>
++
+++#ifndef __dead
+++#define __dead volatile
+++#endif
+++
++ static int	 debug;
++ static int	 verbose;
++ const char	*log_procname;
