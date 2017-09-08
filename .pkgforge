@@ -23,7 +23,6 @@ configure_flags(
 cflags
 harden
 
-patch 'sin_len-fix.patch'
 patch 'dead-def.patch'
 
 build do
