@@ -30,6 +30,7 @@ build do
   configure
   make
   install
+  rm 'var'
 end
 
 test do
