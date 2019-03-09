@@ -1,0 +1,22 @@
+From 90a4fa1607ee3b7b91cf518b251e402eb4c6bd87 Mon Sep 17 00:00:00 2001
+From: Brent Cook <busterb@gmail.com>
+Date: Sat, 19 Jan 2019 05:14:32 -0600
+Subject: [PATCH] disable unveil
+
+---
+ include/unistd.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/unistd.h b/include/unistd.h
+index c112298..e2f34ec 100644
+--- a/include/unistd.h
++++ b/include/unistd.h
+@@ -10,6 +10,8 @@
+ 
+ #define pledge(request, paths) 0
+ 
++#define unveil(path, permissions) 0
++
+ #ifndef HAVE_GETENTROPY
+ int getentropy(void *buf, size_t buflen);
+ #endif

@@ -1,0 +1,558 @@
+From b32c42c989016f0369b93c8ab1fcff27e911f096 Mon Sep 17 00:00:00 2001
+From: Brent Cook <busterb@gmail.com>
+Date: Sat, 19 Jan 2019 02:42:33 -0600
+Subject: [PATCH] update patches
+
+---
+ ...records-on-IPv4-networks-more-libera.patch |  4 +-
+ ...EAI_NODATA-does-not-exist-everywhere.patch |  8 +--
+ ...ll-in-sin_len-sin6_len-if-they-exist.patch | 52 ++-----------------
+ ...heck-if-rdomain-support-is-available.patch |  8 +--
+ ...onf-to-indicate-OS-dependent-options.patch |  4 +-
+ ...ding-default-user-and-file-locations.patch | 20 ++-----
+ ...07-add-p-option-to-create-a-pid-file.patch | 28 +++++-----
+ ...initialize-setproctitle-where-needed.patch | 12 ++---
+ ...-when-constraint-support-is-disabled.patch | 12 ++---
+ ...-updating-the-realtime-clock-on-sync.patch | 10 ++--
+ .../0011-Deal-with-missing-SO_TIMESTAMP.patch |  4 +-
+ ...012-check-result-of-ftello-ftruncate.patch | 10 ++--
+ ...if-we-are-binding-to-an-IPv6-address.patch |  4 +-
+ 13 files changed, 62 insertions(+), 114 deletions(-)
+
+diff --git a/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch b/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
+index 8350276..383786d 100644
+--- a/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
++++ b/patches/0001-Handle-IPv6-DNS-records-on-IPv4-networks-more-libera.patch
+@@ -1,4 +1,4 @@
+-From 16860984133725f67d1601a180063ff4a2af6282 Mon Sep 17 00:00:00 2001
++From 641fc1e7220515456c33a8991890a91608a5b983 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:10:22 -0600
+ Subject: [PATCH 01/13] Handle IPv6 DNS records on IPv4 networks more liberally
+@@ -37,5 +37,5 @@ index 3de52685b1..aa9fc24c68 100644
+  		if (p->addr->ss.ss_family == qa4->sa_family) {
+  			if (bind(p->query->fd, qa4, SA_LEN(qa4)) == -1)
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch b/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
+index 378d36f..89f93c8 100644
+--- a/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
++++ b/patches/0002-EAI_NODATA-does-not-exist-everywhere.patch
+@@ -1,4 +1,4 @@
+-From 827a29308ca7b2ce893a0dc5d6717a500ea9e52d Mon Sep 17 00:00:00 2001
++From 683cb25dcb78b92c29c5148becece3cf4f0c6a28 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:04:08 -0600
+ Subject: [PATCH 02/13] EAI_NODATA does not exist everywhere
+@@ -15,10 +15,10 @@ portable software now has to have a special check instead.
+  1 file changed, 8 insertions(+), 2 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/config.c b/src/usr.sbin/ntpd/config.c
+-index fcf89ddfcc..e3eeed3d67 100644
++index 25a92cf8ae..0208b8dfb4 100644
+ --- a/src/usr.sbin/ntpd/config.c
+ +++ b/src/usr.sbin/ntpd/config.c
+-@@ -133,8 +133,14 @@ host_dns(const char *s, struct ntp_addr **hn)
++@@ -96,8 +96,14 @@ host_dns(const char *s, struct ntp_addr **hn)
+  	hints.ai_socktype = SOCK_DGRAM; /* DUMMY */
+  	/* ntpd MUST NOT use AI_ADDRCONFIG here */
+  	error = getaddrinfo(s, NULL, &hints, &res0);
+@@ -36,5 +36,5 @@ index fcf89ddfcc..e3eeed3d67 100644
+  		log_warnx("could not parse \"%s\": %s", s,
+  		    gai_strerror(error));
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch b/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
+index 0663c9d..920a502 100644
+--- a/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
++++ b/patches/0003-conditionally-fill-in-sin_len-sin6_len-if-they-exist.patch
+@@ -1,56 +1,14 @@
+-From 6843d3c05dedd4609b3ad43eb17983b68a85e710 Mon Sep 17 00:00:00 2001
++From 5d2c25bfd0ff11d74ac912313d405247cbaf5ee2 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:02:50 -0600
+ Subject: [PATCH 03/13] conditionally fill in sin_len/sin6_len if they exist
+ 
+ ---
+- src/usr.sbin/ntpd/config.c | 8 ++++++++
+- src/usr.sbin/ntpd/parse.y  | 8 +++++---
+- 2 files changed, 13 insertions(+), 3 deletions(-)
++ src/usr.sbin/ntpd/parse.y | 8 +++++---
++ 1 file changed, 5 insertions(+), 3 deletions(-)
+ 
+-diff --git a/src/usr.sbin/ntpd/config.c b/src/usr.sbin/ntpd/config.c
+-index e3eeed3d67..a84635ab77 100644
+---- a/src/usr.sbin/ntpd/config.c
+-+++ b/src/usr.sbin/ntpd/config.c
+-@@ -72,7 +72,9 @@ host_v4(const char *s)
+- 	if ((h = calloc(1, sizeof(struct ntp_addr))) == NULL)
+- 		fatal(NULL);
+- 	sa_in = (struct sockaddr_in *)&h->ss;
+-+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+- 	sa_in->sin_len = sizeof(struct sockaddr_in);
+-+#endif
+- 	sa_in->sin_family = AF_INET;
+- 	sa_in->sin_addr.s_addr = ina.s_addr;
+- 
+-@@ -94,7 +96,9 @@ host_v6(const char *s)
+- 		if ((h = calloc(1, sizeof(struct ntp_addr))) == NULL)
+- 			fatal(NULL);
+- 		sa_in6 = (struct sockaddr_in6 *)&h->ss;
+-+#ifdef SIN6_LEN
+- 		sa_in6->sin6_len = sizeof(struct sockaddr_in6);
+-+#endif
+- 		sa_in6->sin6_family = AF_INET6;
+- 		memcpy(&sa_in6->sin6_addr,
+- 		    &((struct sockaddr_in6 *)res->ai_addr)->sin6_addr,
+-@@ -156,12 +160,16 @@ host_dns(const char *s, struct ntp_addr **hn)
+- 		h->ss.ss_family = res->ai_family;
+- 		if (res->ai_family == AF_INET) {
+- 			sa_in = (struct sockaddr_in *)&h->ss;
+-+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+- 			sa_in->sin_len = sizeof(struct sockaddr_in);
+-+#endif
+- 			sa_in->sin_addr.s_addr = ((struct sockaddr_in *)
+- 			    res->ai_addr)->sin_addr.s_addr;
+- 		} else {
+- 			sa_in6 = (struct sockaddr_in6 *)&h->ss;
+-+#ifdef SIN6_LEN
+- 			sa_in6->sin6_len = sizeof(struct sockaddr_in6);
+-+#endif
+- 			memcpy(&sa_in6->sin6_addr, &((struct sockaddr_in6 *)
+- 			    res->ai_addr)->sin6_addr, sizeof(struct in6_addr));
+- 		}
+ diff --git a/src/usr.sbin/ntpd/parse.y b/src/usr.sbin/ntpd/parse.y
+-index 41fa9ba1fc..3dbd0b0c8e 100644
++index be1a7b5369..dd9d75cda7 100644
+ --- a/src/usr.sbin/ntpd/parse.y
+ +++ b/src/usr.sbin/ntpd/parse.y
+ @@ -138,15 +138,17 @@ main		: LISTEN ON address listen_opts	{
+@@ -75,5 +33,5 @@ index 41fa9ba1fc..3dbd0b0c8e 100644
+  				yyerror("invalid IPv4 or IPv6 address: %s\n",
+  				    $3);
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0004-check-if-rdomain-support-is-available.patch b/patches/0004-check-if-rdomain-support-is-available.patch
+index 3e70cee..048c0ee 100644
+--- a/patches/0004-check-if-rdomain-support-is-available.patch
++++ b/patches/0004-check-if-rdomain-support-is-available.patch
+@@ -1,4 +1,4 @@
+-From 547ae2d0dfc8ded1c85af2a8b550c0e769138aa8 Mon Sep 17 00:00:00 2001
++From 546b4b7926dc14f0ea6a60182af23b865e0d18ad Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:05:46 -0600
+ Subject: [PATCH 04/13] check if rdomain support is available.
+@@ -12,7 +12,7 @@ Handle FreeBSD's calling rdomain 'FIB'.
+  3 files changed, 22 insertions(+), 1 deletion(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index 30ef206b47..30f0304dcb 100644
++index 91d1e0fb9b..d438a6576d 100644
+ --- a/src/usr.sbin/ntpd/ntpd.h
+ +++ b/src/usr.sbin/ntpd/ntpd.h
+ @@ -40,6 +40,12 @@
+@@ -29,7 +29,7 @@ index 30ef206b47..30f0304dcb 100644
+  #define	INTERVAL_QUERY_PATHETIC		60
+  #define	INTERVAL_QUERY_AGGRESSIVE	5
+ diff --git a/src/usr.sbin/ntpd/parse.y b/src/usr.sbin/ntpd/parse.y
+-index 3dbd0b0c8e..eb7e9b9e53 100644
++index dd9d75cda7..984beec7a5 100644
+ --- a/src/usr.sbin/ntpd/parse.y
+ +++ b/src/usr.sbin/ntpd/parse.y
+ @@ -436,11 +436,13 @@ weight		: WEIGHT NUMBER	{
+@@ -112,5 +112,5 @@ index 123b6939a2..8c18eb7610 100644
+  		if (bind(la->fd, (struct sockaddr *)&la->sa,
+  		    SA_LEN((struct sockaddr *)&la->sa)) == -1) {
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch b/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
+index 801ae07..11becbf 100644
+--- a/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
++++ b/patches/0005-update-ntpd.conf-to-indicate-OS-dependent-options.patch
+@@ -1,4 +1,4 @@
+-From df6414c5b7b55c15cfa5d2eaac1845041031133f Mon Sep 17 00:00:00 2001
++From 9395697554026abb8eb35dd6b268acb536b57d1d Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Tue, 30 Dec 2014 09:20:03 -0600
+ Subject: [PATCH 05/13] update ntpd.conf to indicate OS-dependent options
+@@ -49,5 +49,5 @@ index 08062bcf28..eee239bf52 100644
+  .Xr ntpd 8
+  will use each given sensor that actually exists.
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0006-allow-overriding-default-user-and-file-locations.patch b/patches/0006-allow-overriding-default-user-and-file-locations.patch
+index 5871ac6..122df7a 100644
+--- a/patches/0006-allow-overriding-default-user-and-file-locations.patch
++++ b/patches/0006-allow-overriding-default-user-and-file-locations.patch
+@@ -1,4 +1,4 @@
+-From e325d0325dc8959374eca27a9dc420b94cf0bafc Mon Sep 17 00:00:00 2001
++From 00ee3b5aea27bc10b3ad6b732dd582b65c74c795 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Thu, 1 Jan 2015 07:18:11 -0600
+ Subject: [PATCH 06/13] allow overriding default user and file locations
+@@ -6,11 +6,11 @@ Subject: [PATCH 06/13] allow overriding default user and file locations
+ Allow the build process to override the default ntpd file paths and
+ default user.
+ ---
+- src/usr.sbin/ntpd/ntpd.h | 18 +++++++++++++++---
+- 1 file changed, 15 insertions(+), 3 deletions(-)
++ src/usr.sbin/ntpd/ntpd.h | 16 +++++++++++++---
++ 1 file changed, 13 insertions(+), 3 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index 30f0304dcb..b7ddfee0ae 100644
++index d438a6576d..0f7313c78e 100644
+ --- a/src/usr.sbin/ntpd/ntpd.h
+ +++ b/src/usr.sbin/ntpd/ntpd.h
+ @@ -35,10 +35,20 @@
+@@ -37,16 +37,6 @@ index 30f0304dcb..b7ddfee0ae 100644
+  
+  #if defined(SO_SETFIB)
+  #define	SO_RTABLE	SO_SETFIB
+-@@ -86,7 +96,9 @@
+- #define CONSTRAINT_PORT			"443"	/* HTTPS port */
+- #define	CONSTRAINT_MAXHEADERLENGTH	8192
+- #define CONSTRAINT_PASSFD		(STDERR_FILENO + 1)
+-+#ifndef CONSTRAINT_CA
+- #define CONSTRAINT_CA			"/etc/ssl/cert.pem"
+-+#endif
+- 
+- #define PARENT_SOCK_FILENO		CONSTRAINT_PASSFD
+- 
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0007-add-p-option-to-create-a-pid-file.patch b/patches/0007-add-p-option-to-create-a-pid-file.patch
+index 3fa177e..7ec02ef 100644
+--- a/patches/0007-add-p-option-to-create-a-pid-file.patch
++++ b/patches/0007-add-p-option-to-create-a-pid-file.patch
+@@ -1,4 +1,4 @@
+-From ecb9f8a24e3d906ecf26ff2eef52a15e62c98e25 Mon Sep 17 00:00:00 2001
++From a9008bf22c4f706cf2a4ce12dac9eb282f295933 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Wed, 31 Dec 2014 08:26:41 -0600
+ Subject: [PATCH 07/13] add -p option to create a pid file
+@@ -13,7 +13,7 @@ Origin: https://bugs.gentoo.org/show_bug.cgi?id=493082
+  3 files changed, 33 insertions(+), 5 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.8 b/src/usr.sbin/ntpd/ntpd.8
+-index 689d269c6c..fbcfa85b3f 100644
++index 0b74c2587f..63b027403c 100644
+ --- a/src/usr.sbin/ntpd/ntpd.8
+ +++ b/src/usr.sbin/ntpd/ntpd.8
+ @@ -25,6 +25,7 @@
+@@ -35,10 +35,10 @@ index 689d269c6c..fbcfa85b3f 100644
+  Do not set the time immediately at startup.
+  This is the default.
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 0ec3ede03b..3d9e089b3e 100644
++index 44c4f72f3f..7c8eda5a1d 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+-@@ -87,6 +87,18 @@ sighdlr(int sig)
++@@ -88,6 +88,18 @@ sighdlr(int sig)
+  	}
+  }
+  
+@@ -57,7 +57,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  __dead void
+  usage(void)
+  {
+-@@ -96,7 +108,7 @@ usage(void)
++@@ -97,7 +109,7 @@ usage(void)
+  		fprintf(stderr,
+  		    "usage: ntpctl -s all | peers | Sensors | status\n");
+  	else
+@@ -66,7 +66,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  		    __progname);
+  	exit(1);
+  }
+-@@ -132,7 +144,7 @@ main(int argc, char *argv[])
++@@ -133,7 +145,7 @@ main(int argc, char *argv[])
+  
+  	memset(&lconf, 0, sizeof(lconf));
+  
+@@ -75,7 +75,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  		switch (ch) {
+  		case 'd':
+  			lconf.debug = 2;
+-@@ -147,6 +159,9 @@ main(int argc, char *argv[])
++@@ -148,6 +160,9 @@ main(int argc, char *argv[])
+  		case 'P':
+  			pname = optarg;
+  			break;
+@@ -85,7 +85,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  		case 's':
+  			lconf.settime = 1;
+  			break;
+-@@ -210,9 +225,11 @@ main(int argc, char *argv[])
++@@ -214,9 +229,11 @@ main(int argc, char *argv[])
+  	if (!lconf.settime) {
+  		log_init(lconf.debug, LOG_DAEMON);
+  		log_setverbose(lconf.verbose);
+@@ -98,7 +98,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  	} else
+  		timeout = SETTIME_TIMEOUT * 1000;
+  
+-@@ -287,9 +304,11 @@ main(int argc, char *argv[])
++@@ -298,9 +315,11 @@ main(int argc, char *argv[])
+  			log_setverbose(lconf.verbose);
+  			log_warnx("no reply received in time, skipping initial "
+  			    "time setting");
+@@ -111,7 +111,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  		}
+  
+  		if (nfds > 0 && (pfd[PFD_PIPE].revents & POLLOUT))
+-@@ -328,6 +347,8 @@ main(int argc, char *argv[])
++@@ -339,6 +358,8 @@ main(int argc, char *argv[])
+  	msgbuf_clear(&ibuf->w);
+  	free(ibuf);
+  	log_info("Terminating");
+@@ -120,7 +120,7 @@ index 0ec3ede03b..3d9e089b3e 100644
+  	return (0);
+  }
+  
+-@@ -388,9 +409,11 @@ dispatch_imsg(struct ntpd_conf *lconf, int argc, char **argv)
++@@ -399,9 +420,11 @@ dispatch_imsg(struct ntpd_conf *lconf, int argc, char **argv)
+  			memcpy(&d, imsg.data, sizeof(d));
+  			ntpd_settime(d);
+  			/* daemonize now */
+@@ -134,10 +134,10 @@ index 0ec3ede03b..3d9e089b3e 100644
+  			timeout = INFTIM;
+  			break;
+ diff --git a/src/usr.sbin/ntpd/ntpd.h b/src/usr.sbin/ntpd/ntpd.h
+-index b7ddfee0ae..39b8e7bf43 100644
++index 0f7313c78e..7ee919dd09 100644
+ --- a/src/usr.sbin/ntpd/ntpd.h
+ +++ b/src/usr.sbin/ntpd/ntpd.h
+-@@ -253,6 +253,7 @@ struct ntpd_conf {
++@@ -250,6 +250,7 @@ struct ntpd_conf {
+  	u_int						constraint_errors;
+  	u_int8_t					*ca;
+  	size_t						ca_len;
+@@ -146,5 +146,5 @@ index b7ddfee0ae..39b8e7bf43 100644
+  
+  struct ctl_show_status {
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0008-initialize-setproctitle-where-needed.patch b/patches/0008-initialize-setproctitle-where-needed.patch
+index 2ad03db..266fbb4 100644
+--- a/patches/0008-initialize-setproctitle-where-needed.patch
++++ b/patches/0008-initialize-setproctitle-where-needed.patch
+@@ -1,4 +1,4 @@
+-From 03a66edf986ac0801dcf40eeab147ca54c3afcb9 Mon Sep 17 00:00:00 2001
++From fb2c22a2d06541415f153e195ce577e475cdf26a Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Mon, 12 Jan 2015 06:18:31 -0600
+ Subject: [PATCH 08/13] initialize setproctitle where needed
+@@ -10,10 +10,10 @@ clobbering them.
+  1 file changed, 20 insertions(+)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 3d9e089b3e..57f1f4ff3b 100644
++index 7c8eda5a1d..4e4efa45c8 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+-@@ -117,6 +117,13 @@ usage(void)
++@@ -118,6 +118,13 @@ usage(void)
+  #define PFD_PIPE		0
+  #define PFD_MAX			1
+  
+@@ -27,7 +27,7 @@ index 3d9e089b3e..57f1f4ff3b 100644
+  int
+  main(int argc, char *argv[])
+  {
+-@@ -135,6 +142,8 @@ main(int argc, char *argv[])
++@@ -136,6 +143,8 @@ main(int argc, char *argv[])
+  	char			**argv0 = argv;
+  	char			*pname = NULL;
+  
+@@ -36,7 +36,7 @@ index 3d9e089b3e..57f1f4ff3b 100644
+  	if (strcmp(__progname, "ntpctl") == 0) {
+  		ctl_main(argc, argv);
+  		/* NOTREACHED */
+-@@ -144,6 +153,17 @@ main(int argc, char *argv[])
++@@ -145,6 +154,17 @@ main(int argc, char *argv[])
+  
+  	memset(&lconf, 0, sizeof(lconf));
+  
+@@ -55,5 +55,5 @@ index 3d9e089b3e..57f1f4ff3b 100644
+  		switch (ch) {
+  		case 'd':
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch b/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
+index 8e2f98b..d44aedd 100644
+--- a/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
++++ b/patches/0009-Notify-the-user-when-constraint-support-is-disabled.patch
+@@ -1,4 +1,4 @@
+-From 071d21a66c0814efcecdba702a11d886fc1b444e Mon Sep 17 00:00:00 2001
++From 1c8dc7b9bda86123ccc6744142a80520b75e0b9e Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Fri, 27 Mar 2015 23:14:15 -0500
+ Subject: [PATCH 09/13] Notify the user when constraint support is disabled.
+@@ -13,10 +13,10 @@ From Paul B. Henson.
+  3 files changed, 14 insertions(+), 2 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/config.c b/src/usr.sbin/ntpd/config.c
+-index a84635ab77..430992137a 100644
++index 0208b8dfb4..c2f9422f38 100644
+ --- a/src/usr.sbin/ntpd/config.c
+ +++ b/src/usr.sbin/ntpd/config.c
+-@@ -219,6 +219,9 @@ new_constraint(void)
++@@ -163,6 +163,9 @@ new_constraint(void)
+  	p->id = ++constraint_maxid;
+  	p->fd = -1;
+  
+@@ -27,7 +27,7 @@ index a84635ab77..430992137a 100644
+  }
+  
+ diff --git a/src/usr.sbin/ntpd/constraint.c b/src/usr.sbin/ntpd/constraint.c
+-index 7e259af2d8..8a3ddacc10 100644
++index 76dc4f7bdf..ec7c38df68 100644
+ --- a/src/usr.sbin/ntpd/constraint.c
+ +++ b/src/usr.sbin/ntpd/constraint.c
+ @@ -336,12 +336,14 @@ priv_constraint_child(const char *pw_dir, uid_t pw_uid, gid_t pw_gid)
+@@ -38,7 +38,7 @@ index 7e259af2d8..8a3ddacc10 100644
+  	/* Init TLS and load CA certs before chroot() */
+  	if (tls_init() == -1)
+  		fatalx("tls_init");
+- 	if ((conf->ca = tls_load_file(CONSTRAINT_CA,
++ 	if ((conf->ca = tls_load_file(tls_default_ca_cert_file(),
+  	    &conf->ca_len, NULL)) == NULL)
+  		fatalx("failed to load constraint ca");
+ +#endif
+@@ -68,5 +68,5 @@ index eee239bf52..5181a9c504 100644
+  .It Ic constraint from Ar url
+  Specify the URL, IP address or the hostname of an HTTPS server to
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch b/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
+index 2c74dff..51a2b3b 100644
+--- a/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
++++ b/patches/0010-add-a-method-for-updating-the-realtime-clock-on-sync.patch
+@@ -1,4 +1,4 @@
+-From 6ad4d6a4f65e622c6206484a1a5777368257b40f Mon Sep 17 00:00:00 2001
++From 6f16675197729ad7cbcb03fa2f95b38a08e92679 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <busterb@gmail.com>
+ Date: Mon, 4 May 2015 04:27:29 -0500
+ Subject: [PATCH 10/13] add a method for updating the realtime clock on sync
+@@ -9,10 +9,10 @@ from Christian Weisgerber
+  1 file changed, 2 insertions(+)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 57f1f4ff3b..0eb7f573c4 100644
++index 4e4efa45c8..a0b2ab339e 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+-@@ -55,6 +55,7 @@ const char     *ctl_lookup_option(char *, const char **);
++@@ -56,6 +56,7 @@ const char     *ctl_lookup_option(char *, const char **);
+  void		show_status_msg(struct imsg *);
+  void		show_peer_msg(struct imsg *, int);
+  void		show_sensor_msg(struct imsg *, int);
+@@ -20,7 +20,7 @@ index 57f1f4ff3b..0eb7f573c4 100644
+  
+  volatile sig_atomic_t	 quit = 0;
+  volatile sig_atomic_t	 reconfig = 0;
+-@@ -482,6 +483,7 @@ ntpd_adjtime(double d)
++@@ -493,6 +494,7 @@ ntpd_adjtime(double d)
+  	else if (!firstadj && olddelta.tv_sec == 0 && olddelta.tv_usec == 0)
+  		synced = 1;
+  	firstadj = 0;
+@@ -29,5 +29,5 @@ index 57f1f4ff3b..0eb7f573c4 100644
+  }
+  
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch b/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
+index 7b37d7d..f8a0614 100644
+--- a/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
++++ b/patches/0011-Deal-with-missing-SO_TIMESTAMP.patch
+@@ -1,4 +1,4 @@
+-From 5dabc9efbaf148d8b40bf33df887dca0b6057954 Mon Sep 17 00:00:00 2001
++From b6d55ddfe09268467fa7953037be7383bbab7154 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+ Date: Sun, 6 Dec 2015 22:35:38 -0600
+ Subject: [PATCH 11/13] Deal with missing SO_TIMESTAMP
+@@ -65,5 +65,5 @@ index aa9fc24c68..bb5c4f4c0e 100644
+  	if (T4 < JAN_1970) {
+  		client_log_error(p, "recvmsg control format", EBADF);
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0012-check-result-of-ftello-ftruncate.patch b/patches/0012-check-result-of-ftello-ftruncate.patch
+index fd8fd2f..7dc428e 100644
+--- a/patches/0012-check-result-of-ftello-ftruncate.patch
++++ b/patches/0012-check-result-of-ftello-ftruncate.patch
+@@ -1,4 +1,4 @@
+-From 8a61f073185e262887ed4aef8c2ec4e2f922d708 Mon Sep 17 00:00:00 2001
++From b8220a87e4121bd764aa6bf092bd2a2a323c883c Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+ Date: Mon, 21 Dec 2015 05:53:20 -0600
+ Subject: [PATCH 12/13] check result of ftello/ftruncate
+@@ -8,10 +8,10 @@ Subject: [PATCH 12/13] check result of ftello/ftruncate
+  1 file changed, 5 insertions(+), 2 deletions(-)
+ 
+ diff --git a/src/usr.sbin/ntpd/ntpd.c b/src/usr.sbin/ntpd/ntpd.c
+-index 0eb7f573c4..de0d750c57 100644
++index a0b2ab339e..c3b7ab07e1 100644
+ --- a/src/usr.sbin/ntpd/ntpd.c
+ +++ b/src/usr.sbin/ntpd/ntpd.c
+-@@ -586,6 +586,7 @@ writefreq(double d)
++@@ -597,6 +597,7 @@ writefreq(double d)
+  {
+  	int r;
+  	static int warnonce = 1;
+@@ -19,7 +19,7 @@ index 0eb7f573c4..de0d750c57 100644
+  
+  	if (freqfp == NULL)
+  		return 0;
+-@@ -599,8 +600,10 @@ writefreq(double d)
++@@ -610,8 +611,10 @@ writefreq(double d)
+  		clearerr(freqfp);
+  		return 0;
+  	}
+@@ -33,5 +33,5 @@ index 0eb7f573c4..de0d750c57 100644
+  }
+  
+ -- 
+-2.14.0
++2.20.1
+ 
+diff --git a/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch b/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
+index 90d3399..275f1e4 100644
+--- a/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
++++ b/patches/0013-set-IPV6_V6ONLY-if-we-are-binding-to-an-IPv6-address.patch
+@@ -1,4 +1,4 @@
+-From f16fddf3d74779243b0f44072da9fa13d74b7c17 Mon Sep 17 00:00:00 2001
++From 4f01d08765ee2d031e703e3201a07793247fa323 Mon Sep 17 00:00:00 2001
+ From: Brent Cook <bcook@openbsd.org>
+ Date: Sat, 13 Aug 2016 14:22:02 -0500
+ Subject: [PATCH 13/13] set IPV6_V6ONLY if we are binding to an IPv6 address
+@@ -35,5 +35,5 @@ index 8c18eb7610..9eab1a74bf 100644
+  		if (la->rtable != -1 &&
+  		    setsockopt(la->fd, SOL_SOCKET, SO_RTABLE, &la->rtable,
+ -- 
+-2.14.0
++2.20.1
+ 
