@@ -23,10 +23,6 @@ configure_flags(
 cflags
 harden
 
-patch '17aa5d98191c4dc85d0645443fc97a12601ae8da.patch'
-patch 'b32c42c989016f0369b93c8ab1fcff27e911f096.patch'
-patch '90a4fa1607ee3b7b91cf518b251e402eb4c6bd87.patch'
-
 build do
   run './autogen.sh'
   configure
